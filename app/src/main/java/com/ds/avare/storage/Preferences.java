@@ -81,19 +81,37 @@ public class Preferences {
     public static final long MEM_64 = 64 * 1024 * 1024;
     public static final long MEM_32 = 32 * 1024 * 1024;
 
+    /*
+     * Using RGB565, each tile is  512 x 512 x 2 = 524,288 bytes.
+     * Conservatively, let's say each tile will use 1MB of memory
+     */
 
+    // 11*11 + 20 = 141MB out of 256MB
+    public static final int MEM_256_X = 11;
+    public static final int MEM_256_Y = 11;
+    public static final int MEM_256_OH = 20;
+
+    // 9*9 + 13 = 76MB out of 192MB
     public static final int MEM_192_X = 9;
-    public static final int MEM_192_Y = 7;
+    public static final int MEM_192_Y = 9;
     public static final int MEM_192_OH = 13;
+
+    // 7*7 + 7 =  56MB out of 128MB
     public static final int MEM_128_X = 7;
-    public static final int MEM_128_Y = 5;
+    public static final int MEM_128_Y = 7;
     public static final int MEM_128_OH = 7;
+
+    // 5*5 + 5 = 30MB out of 64MB
     public static final int MEM_64_X = 5;
-    public static final int MEM_64_Y = 3;
+    public static final int MEM_64_Y = 5;
     public static final int MEM_64_OH = 5;
+
+    // 3*3 + 3 = 12MB out of 32MB
     public static final int MEM_32_X = 3;
     public static final int MEM_32_Y = 3;
     public static final int MEM_32_OH = 3;
+
+    // 3*3 + 3 = 12MB out of 16MB
     public static final int MEM_16_X = 3;
     public static final int MEM_16_Y = 3;
     public static final int MEM_16_OH = 3;
@@ -329,7 +347,11 @@ public class Preferences {
          */
         long mem = Runtime.getRuntime().maxMemory();
 
-        if (mem >= MEM_192) {
+        if (mem >= MEM_256) {
+            ret[0] = MEM_256_X;
+            ret[1] = MEM_256_Y;
+            ret[2] = MEM_256_OH;
+        } else if (mem >= MEM_192) {
             ret[0] = MEM_192_X;
             ret[1] = MEM_192_Y;
             ret[2] = MEM_192_OH;
@@ -359,8 +381,10 @@ public class Preferences {
         defaultDisplay.getMetrics(displayMetrics);
         int width = displayMetrics.widthPixels;
         int height = displayMetrics.heightPixels;
-        int tilesx = (width / BitmapHolder.WIDTH) + 2; // add 1 for round up, and 1 for zoom
-        int tilesy = (height / BitmapHolder.HEIGHT) + 2;
+        int tilesx = (width / (BitmapHolder.WIDTH/2)) + 2;
+        int tilesy = (height / (BitmapHolder.HEIGHT/2)) + 2;
+        // divide tile size by 2 since that's the smallest size that tiles will be displayed at
+        // before the next larger scale tiles will be used, and add 2 (one for each side of the screen
 
         // odd tiles only
         if(tilesx % 2 == 0) {
